@@ -19,19 +19,11 @@
       "lon_max": 82.6,
       "variables":[
         {"p": ["WRF_A", "4.0"]},
-        {"q": ["WRF_C", "4.0"]}
+        {"q": ["WRF_C", "4.0"]},
+        .........
         ],
-      "equation": "3x-y"
+      "equation": "3x-y........."
     },
-    {
-      "lat_min": 6.7,
-      "lat_max": 8.9,
-      "lon_min": 76.9,
-      "lon_max": 82.6,
-      "variables":[
-        {"a": ["WRF_A", "4.0"]}
-        ],
-      "equation": "0.8x"
-    }
+    ..........
   ]
 }
