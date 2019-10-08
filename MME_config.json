@@ -1,10 +1,12 @@
 {
   "wrf_regions": [
     {
-      "lat_min": 6.7,
-      "lat_max": 8.9,
-      "lon_min": 76.9,
-      "lon_max": 82.6,
+      "lat_min": 6.6,
+      "lat_max": 7.4,
+      "lon_min": 79.6,
+      "lon_max": 81.0,
+      "start":"2019-10-07 23:45:00",
+      "end": "2019-10-10 23:30:00",
       "variables": [
         [
           "WRF_A",
