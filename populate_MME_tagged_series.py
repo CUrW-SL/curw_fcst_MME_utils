@@ -41,8 +41,13 @@ def select_d03_sub_region(all_grids, lon_min, lon_max, lat_min, lat_max):
 
 
 def update_MME_tagged_series(start, end, variables, sub_region, tms_meta):
-    return
 
+    print(sub_region)
+    # station_prefix = 'wrf_{}_{}'.format(lat, lon)
+    #
+    # station_id = wrf_v3_stations.get(station_prefix)
+
+    return
 
 
 if __name__=="__main__":
