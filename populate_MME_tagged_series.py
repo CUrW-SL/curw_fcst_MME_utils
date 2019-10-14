@@ -16,6 +16,7 @@ from db_adapter.curw_fcst.source import get_source_id
 
 wrf_v3_stations = {}
 
+
 def read_attribute_from_config_file(attribute, config, compulsory):
     """
     :param attribute: key name of the config json file
