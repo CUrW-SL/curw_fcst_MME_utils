@@ -110,3 +110,4 @@ ENV/
 
 # mypy
 .mypy_cache/
+/db_adapter_config.json
