@@ -48,6 +48,27 @@ def update_MME_tagged_series(start, end, variables, sub_region, tms_meta):
     #
     # station_id = wrf_v3_stations.get(station_prefix)
 
+    # tms_id = ts.get_timeseries_id_if_exists(tms_meta)
+    #
+    # if tms_id is None:
+    #     tms_id = ts.generate_timeseries_id(tms_meta)
+    #
+    #     run_meta = {
+    #         'tms_id': tms_id,
+    #         'sim_tag': tms_meta['sim_tag'],
+    #         'start_date': start_date,
+    #         'end_date': end_date,
+    #         'station_id': station_id,
+    #         'source_id': tms_meta['source_id'],
+    #         'unit_id': tms_meta['unit_id'],
+    #         'variable_id': tms_meta['variable_id']
+    #     }
+    #     try:
+    #         ts.insert_run(run_meta)
+    #     except Exception:
+    #         logger.error("Exception occurred while inserting run entry {}".format(run_meta))
+    #         traceback.print_exc()
+
     return
 
 

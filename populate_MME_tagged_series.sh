@@ -19,7 +19,7 @@ echo "Activating venv python3 virtual environment."
 source venv/bin/activate
 
 # Install dependencies using pip.
-if [ ! -f "curw_sim_utils.log" ]
+if [ ! -f "MME_utils.log" ]
 then
     echo "Installing PyMySQL"
     pip install PyMySQL
