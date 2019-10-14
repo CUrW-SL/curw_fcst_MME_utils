@@ -1,0 +1,11 @@
+{
+  "model": "WRF",
+  "version": "4.0",
+
+  "sim_tag": "MME",
+
+  "unit": "mm",
+  "unit_type": "Accumulative",
+
+  "variable": "Precipitation"
+}
