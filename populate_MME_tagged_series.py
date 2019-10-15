@@ -4,17 +4,34 @@ import json
 import pandas as pd
 from datetime import datetime, timedelta
 import sys
+import csv
+import time
 
 from db_adapter.logger import logger
 from db_adapter.base import get_Pool, destroy_Pool
 from db_adapter.constants import CURW_FCST_USERNAME, CURW_FCST_PORT, CURW_FCST_PASSWORD, CURW_FCST_HOST, \
     CURW_FCST_DATABASE
+from db_adapter.constants import COMMON_DATE_TIME_FORMAT
 from db_adapter.curw_fcst.unit import UnitType, get_unit_id
 from db_adapter.curw_fcst.variable import get_variable_id
-from db_adapter.curw_fcst.station import get_station_id, get_wrf_stations
+from db_adapter.curw_fcst.station import get_wrf_stations
 from db_adapter.curw_fcst.source import get_source_id
+from db_adapter.curw_fcst.timeseries import Timeseries
 
 wrf_v3_stations = {}
+
+
+def create_csv(file_name, data):
+    """
+    Create new csv file using given data
+    :param file_name: <file_path/file_name>.csv
+    :param data: list of lists
+    e.g. [['Person', 'Age'], ['Peter', '22'], ['Jasmine', '21'], ['Sam', '24']]
+    :return:
+    """
+    with open(file_name, 'w') as csvFile:
+        writer = csv.writer(csvFile)
+        writer.writerows(data)
 
 
 def read_attribute_from_config_file(attribute, config, compulsory):
@@ -41,35 +58,79 @@ def select_d03_sub_region(all_grids, lon_min, lon_max, lat_min, lat_max):
     return selected_grids
 
 
-def update_MME_tagged_series(start, end, variables, sub_region, tms_meta):
+def calculate_MME_series(start, end, variables, station_id, variable_id, unit_id):
 
-    print(sub_region)
-    # station_prefix = 'wrf_{}_{}'.format(lat, lon)
-    #
-    # station_id = wrf_v3_stations.get(station_prefix)
+    index = pd.date_range(start=start, end=end, freq='5min')
+    df = pd.DataFrame(index=index)
 
-    # tms_id = ts.get_timeseries_id_if_exists(tms_meta)
-    #
-    # if tms_id is None:
-    #     tms_id = ts.generate_timeseries_id(tms_meta)
-    #
-    #     run_meta = {
-    #         'tms_id': tms_id,
-    #         'sim_tag': tms_meta['sim_tag'],
-    #         'start_date': start_date,
-    #         'end_date': end_date,
-    #         'station_id': station_id,
-    #         'source_id': tms_meta['source_id'],
-    #         'unit_id': tms_meta['unit_id'],
-    #         'variable_id': tms_meta['variable_id']
-    #     }
-    #     try:
-    #         ts.insert_run(run_meta)
-    #     except Exception:
-    #         logger.error("Exception occurred while inserting run entry {}".format(run_meta))
-    #         traceback.print_exc()
+    for variable in variables:
 
-    return
+        model = variables[variable][0]
+        version = variables[variable][1]
+        sim_tag = variables[variable][2]
+        coefficient = variables[variable][3]
+
+        try:
+            source_id = get_source_id(pool=pool, model=model, version=version)
+        except Exception:
+            msg = "Exception occurred while loading source id from database."
+            logger.error(msg)
+
+
+
+def update_MME_tagged_series(pool, start, end, variables, sub_region, tms_meta, fgt):
+
+    for index, row in sub_region.iterrows():
+        lat = float('%.6f' % row['latitude'])
+        lon = float('%.6f' % row['longitude'])
+
+        tms_meta['latitude'] = str(lat)
+        tms_meta['longitude'] = str(lon)
+
+        station_prefix = 'wrf_{}_{}'.format(lat, lon)
+
+        station_id = wrf_v3_stations.get(station_prefix)
+
+        # TS = Timeseries(pool=pool)
+        #
+        # tms_id = TS.get_timeseries_id_if_exists(tms_meta)
+        #
+        # if tms_id is None:
+        #     tms_id = TS.generate_timeseries_id(tms_meta)
+        #
+        #     run_meta = {
+        #         'tms_id': tms_id,
+        #         'sim_tag': tms_meta['sim_tag'],
+        #         'start_date': fgt,
+        #         'end_date': fgt,
+        #         'station_id': station_id,
+        #         'source_id': tms_meta['source_id'],
+        #         'unit_id': tms_meta['unit_id'],
+        #         'variable_id': tms_meta['variable_id']
+        #     }
+        #     try:
+        #         TS.insert_run(run_meta)
+        #     except Exception:
+        #         logger.error("Exception occurred while inserting run entry {}".format(run_meta))
+        #         traceback.print_exc()
+
+        timeseries = []
+        timeseries = calculate_MME_series(start=start, end=end, variables=variables, station_id=station_id,
+                                          variable_id=tms_meta['variable_id'], unit_id=tms_meta['unit_id'])
+
+        # try:
+        #     TS.insert_formatted_data(timeseries, True)  # upsert True
+        #     TS.update_latest_fgt(id_=tms_id, fgt=fgt)
+        # except Exception:
+        #     time.sleep(5)
+        #     try:
+        #         TS.insert_formatted_data(timeseries, True)  # upsert True
+        #         TS.update_latest_fgt(id_=tms_id, fgt=fgt)
+        #     except Exception:
+        #         msg = "Inserting the timseseries for tms_id {} and fgt {} failed.".format(timeseries[0][0],
+        #                                                                          timeseries[0][2])
+        #         logger.error(msg)
+        #         traceback.print_exc()
 
 
 if __name__=="__main__":
@@ -102,6 +163,8 @@ if __name__=="__main__":
 
         pool = get_Pool(host=CURW_FCST_HOST, port=CURW_FCST_PORT, user=CURW_FCST_USERNAME, password=CURW_FCST_PASSWORD,
                         db=CURW_FCST_DATABASE)
+
+        fgt = (datetime.now() + timedelta(hours=5, minutes=30)).strftime(COMMON_DATE_TIME_FORMAT)
 
         try:
             wrf_v3_stations = get_wrf_stations(pool)
@@ -138,7 +201,8 @@ if __name__=="__main__":
             sub_region = select_d03_sub_region(all_grids=d03_grids, lon_min=lon_min, lon_max=lon_max,
                                                lat_min=lat_min, lat_max=lat_max)
 
-            update_MME_tagged_series(start=start, end=end, variables=variables, sub_region=sub_region, tms_meta=tms_meta)
+            update_MME_tagged_series(pool=pool, start=start, end=end, variables=variables, sub_region=sub_region,
+                                     tms_meta=tms_meta, fgt=fgt)
 
     except Exception as e:
         print('An exception occurred.')
