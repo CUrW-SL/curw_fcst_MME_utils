@@ -4,6 +4,7 @@ import json
 import pandas as pd
 from datetime import datetime, timedelta
 import sys
+import numpy
 import csv
 import time
 
@@ -21,17 +22,19 @@ from db_adapter.curw_fcst.timeseries import Timeseries
 wrf_v3_stations = {}
 
 
-def create_csv(file_name, data):
+def list_of_lists_to_df_first_column_as_index(data):
     """
-    Create new csv file using given data
-    :param file_name: <file_path/file_name>.csv
-    :param data: list of lists
-    e.g. [['Person', 'Age'], ['Peter', '22'], ['Jasmine', '21'], ['Sam', '24']]
-    :return:
+
+    :param data: data in list of lists format
+    :return: equivalent pandas dataframe
     """
-    with open(file_name, 'w') as csvFile:
-        writer = csv.writer(csvFile)
-        writer.writerows(data)
+    original_data = np.array(data)
+    index = original_data[:, 0]
+    data = original_data[:, 1:]
+
+    # datetime_index = index.astype('datetime64', copy=False)
+
+    return pd.DataFrame.from_records(data=data, index=index)
 
 
 def read_attribute_from_config_file(attribute, config, compulsory):
@@ -58,7 +61,7 @@ def select_d03_sub_region(all_grids, lon_min, lon_max, lat_min, lat_max):
     return selected_grids
 
 
-def calculate_MME_series(start, end, variables, station_id, variable_id, unit_id):
+def calculate_MME_series(TS, start, end, variables, station_id, variable_id, unit_id):
 
     index = pd.date_range(start=start, end=end, freq='5min')
     df = pd.DataFrame(index=index)
@@ -75,7 +78,15 @@ def calculate_MME_series(start, end, variables, station_id, variable_id, unit_id
         except Exception:
             msg = "Exception occurred while loading source id from database."
             logger.error(msg)
+            exit(1)
 
+        print("#########################", model, version)
+        fcst_ts = TS.get_latest_timeseries(sim_tag=sim_tag, source_id=source_id, station_id=station_id,
+                                 variable_id=variable_id, unit_id=unit_id)
+
+        ts = list_of_lists_to_df_first_column_as_index(fcst_ts)
+
+        print(ts)
 
 
 def update_MME_tagged_series(pool, start, end, variables, sub_region, tms_meta, fgt):
@@ -91,7 +102,7 @@ def update_MME_tagged_series(pool, start, end, variables, sub_region, tms_meta, 
 
         station_id = wrf_v3_stations.get(station_prefix)
 
-        # TS = Timeseries(pool=pool)
+        TS = Timeseries(pool=pool)
         #
         # tms_id = TS.get_timeseries_id_if_exists(tms_meta)
         #
@@ -114,9 +125,10 @@ def update_MME_tagged_series(pool, start, end, variables, sub_region, tms_meta, 
         #         logger.error("Exception occurred while inserting run entry {}".format(run_meta))
         #         traceback.print_exc()
 
-        timeseries = []
-        timeseries = calculate_MME_series(start=start, end=end, variables=variables, station_id=station_id,
+        timeseries = calculate_MME_series(TS=TS, start=start, end=end, variables=variables, station_id=station_id,
                                           variable_id=tms_meta['variable_id'], unit_id=tms_meta['unit_id'])
+
+        break
 
         # try:
         #     TS.insert_formatted_data(timeseries, True)  # upsert True
