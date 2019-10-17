@@ -5,7 +5,7 @@ from db_adapter.constants import CURW_FCST_USERNAME, CURW_FCST_PORT, CURW_FCST_P
     CURW_FCST_DATABASE
 
 
-def get_curw_fcst_hash_ids(sim_tag=None, source_id=None, variable_id=None, unit_id=None, station_id=None,
+def get_curw_fcst_hash_ids(pool, sim_tag=None, source_id=None, variable_id=None, unit_id=None, station_id=None,
                            start=None, end=None):
 
     pre_sql_statement = "SELECT `id` FROM `run` WHERE "
@@ -74,11 +74,12 @@ if __name__=="__main__":
 
     try:
 
-        hash_ids = get_curw_fcst_hash_ids(sim_tag="evening_18_hrs", source_id="13", variable_id=None, unit_id=None, station_id=None,
-                           start=None, end=None)
-
         pool = get_Pool(host=CURW_FCST_HOST, port=CURW_FCST_PORT, user=CURW_FCST_USERNAME, password=CURW_FCST_PASSWORD,
                         db=CURW_FCST_DATABASE)
+
+        hash_ids = get_curw_fcst_hash_ids(pool=pool, sim_tag="gfs_d0_00", source_id="12",
+                                          variable_id=None, unit_id=None, station_id=None,
+                                          start=None, end=None)
 
         print("{} of hash ids are there".format(len(hash_ids)))
 
