@@ -221,5 +221,6 @@ if __name__=="__main__":
         traceback.print_exc()
     finally:
         print("Process finished")
+        destroy_Pool(pool=pool)
 
 
