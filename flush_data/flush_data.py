@@ -62,7 +62,7 @@ def get_curw_fcst_hash_ids(pool, sim_tag=None, source_id=None, variable_id=None,
             if row_count > 0:
                 results = cursor.fetchall()
                 for result in results:
-                    hash_ids.append(result.get('id'))
+                    ids.append(result.get('id'))
         return ids
     except Exception:
         traceback.print_exc()
