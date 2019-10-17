@@ -4,6 +4,7 @@ import traceback
 from db_adapter.base import get_Pool, destroy_Pool
 from db_adapter.constants import CURW_FCST_USERNAME, CURW_FCST_PORT, CURW_FCST_PASSWORD, CURW_FCST_HOST, \
     CURW_FCST_DATABASE
+from db_adapter.curw_fcst.timeseries import Timeseries
 
 
 def get_curw_fcst_hash_ids(pool, sim_tag=None, source_id=None, variable_id=None, unit_id=None, station_id=None,
@@ -82,7 +83,16 @@ if __name__=="__main__":
                                           variable_id=None, unit_id=None, station_id=None,
                                           start=None, end=None)
 
-        print("{} of hash ids are there".format(len(hash_ids)))
+        TS = Timeseries(pool=pool)
+
+        ################################################################################
+        # delete as a whole (entry in run table and all related entries in data table) #
+        ################################################################################
+        for id in hash_ids:
+            TS.delete_all_by_hash_id(id_=id)
+            print(id)
+
+        print("{} of hash ids are deleted".format(len(hash_ids)))
 
 
     except Exception as e:
