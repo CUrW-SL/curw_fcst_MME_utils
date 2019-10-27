@@ -86,7 +86,7 @@ def calculate_MME_series(TS, start, end, variables, station_id, variable_id, uni
 
         timeseries = list_of_lists_to_df_first_column_as_index(fcst_ts)
 
-        df = df.join(timeseries)
+        df = df.join(timeseries, lsuffix='_left', rsuffix='_right')
 
         print(df)
 
