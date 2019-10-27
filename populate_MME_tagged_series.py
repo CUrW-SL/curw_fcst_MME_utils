@@ -88,9 +88,9 @@ def calculate_MME_series(TS, start, end, variables, station_id, variable_id, uni
         timeseries[[0]] = timeseries[[0]].astype('float64') * coefficient
 
         print(timeseries)
-
         df = df.join(timeseries, lsuffix='_left', rsuffix='_right')
         df.fillna(0)
+        df['sum'] = df.sum(axis=1)
 
         print(df)
 
