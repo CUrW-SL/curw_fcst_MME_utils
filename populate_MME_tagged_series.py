@@ -85,7 +85,7 @@ def calculate_MME_series(TS, start, end, variables, station_id, variable_id, uni
                                  variable_id=variable_id, unit_id=unit_id)
 
         timeseries = list_of_lists_to_df_first_column_as_index(fcst_ts)
-        timeseries[[0]] = pd.to_numeric(timeseries[[0]]) * coefficient
+        timeseries[[0]] = timeseries[[0]].astype('float64') * coefficient
 
         print(timeseries)
 
