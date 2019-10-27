@@ -4,7 +4,7 @@ import json
 import pandas as pd
 from datetime import datetime, timedelta
 import sys
-import numpy
+import numpy as np
 import csv
 import time
 
@@ -63,7 +63,7 @@ def select_d03_sub_region(all_grids, lon_min, lon_max, lat_min, lat_max):
 
 def calculate_MME_series(TS, start, end, variables, station_id, variable_id, unit_id):
 
-    index = pd.date_range(start=start, end=end, freq='5min')
+    index = pd.date_range(start=start, end=end, freq='15min')
     df = pd.DataFrame(index=index)
 
     for variable in variables:
@@ -84,9 +84,11 @@ def calculate_MME_series(TS, start, end, variables, station_id, variable_id, uni
         fcst_ts = TS.get_latest_timeseries(sim_tag=sim_tag, source_id=source_id, station_id=station_id,
                                  variable_id=variable_id, unit_id=unit_id)
 
-        ts = list_of_lists_to_df_first_column_as_index(fcst_ts)
+        timeseries = list_of_lists_to_df_first_column_as_index(fcst_ts)
 
-        print(ts)
+        df = df.join(timeseries)
+
+        print(df)
 
 
 def update_MME_tagged_series(pool, start, end, variables, sub_region, tms_meta, fgt):
