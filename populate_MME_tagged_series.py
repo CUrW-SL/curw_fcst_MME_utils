@@ -68,10 +68,10 @@ def calculate_MME_series(TS, start, end, variables, station_id, variable_id, uni
 
     for variable in variables:
 
-        model = variables[variable][0]
-        version = variables[variable][1]
-        sim_tag = variables[variable][2]
-        coefficient = variables[variable][3]
+        model = variable[0]
+        version = variable[1]
+        sim_tag = variable[2]
+        coefficient = variable[3]
 
         try:
             source_id = get_source_id(pool=pool, model=model, version=version)
