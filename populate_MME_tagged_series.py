@@ -90,9 +90,11 @@ def calculate_MME_series(TS, start, end, variables, station_id, variable_id, uni
         print(timeseries)
         df = df.join(timeseries, lsuffix='_left', rsuffix='_right')
         df.fillna(0)
-        df['sum'] = df.sum(axis=1)
 
         print(df)
+
+    df['sum'] = df.sum(axis=1)
+    print('final dataframe', df)
 
 
 def update_MME_tagged_series(pool, start, end, variables, sub_region, tms_meta, fgt):
