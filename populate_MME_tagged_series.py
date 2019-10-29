@@ -54,6 +54,41 @@ def read_attribute_from_config_file(attribute, config, compulsory):
         return None
 
 
+def update_latest_fgt(ts, tms_id, fgt):
+    try:
+        ts.update_latest_fgt(id_=tms_id, fgt=fgt)
+    except Exception:
+        try:
+            time.sleep(5)
+            ts.update_latest_fgt(id_=tms_id, fgt=fgt)
+        except Exception:
+            msg = "Updating fgt {} for tms_id {} failed.".format(fgt, tms_id)
+            logger.error(msg)
+            traceback.print_exc()
+
+
+def push_rainfall_to_db(ts, ts_data, tms_id, fgt):
+    """
+
+    :param ts: timeseries class instance
+    :param ts_data: timeseries
+    :return:
+    """
+
+    try:
+        ts.insert_formatted_data(ts_data, True)  # upsert True
+        update_latest_fgt(ts, tms_id, fgt)
+    except Exception:
+        try:
+            time.sleep(5)
+            ts.insert_formatted_data(ts_data, True)  # upsert True
+            update_latest_fgt(ts, tms_id, fgt)
+        except Exception:
+            msg = "Inserting the timseseries for tms_id {} and fgt {} failed.".format(ts_data[0][0], ts_data[0][2])
+            logger.error(msg)
+            traceback.print_exc()
+
+
 def select_d03_sub_region(all_grids, lon_min, lon_max, lat_min, lat_max):
     selected_grids = all_grids[(all_grids.longitude >= lon_min) & (all_grids.longitude <= lon_max) &
                                    (all_grids.latitude >= lat_min) & (all_grids.latitude <= lat_max)]
@@ -109,47 +144,40 @@ def update_MME_tagged_series(pool, start, end, variables, sub_region, tms_meta, 
 
         TS = Timeseries(pool=pool)
 
-        # tms_id = TS.get_timeseries_id_if_exists(tms_meta)
-        #
-        # if tms_id is None:
-        #     tms_id = TS.generate_timeseries_id(tms_meta)
-        #
-        #     run_meta = {
-        #         'tms_id': tms_id,
-        #         'sim_tag': tms_meta['sim_tag'],
-        #         'start_date': fgt,
-        #         'end_date': fgt,
-        #         'station_id': station_id,
-        #         'source_id': tms_meta['source_id'],
-        #         'unit_id': tms_meta['unit_id'],
-        #         'variable_id': tms_meta['variable_id']
-        #     }
-        #     try:
-        #         TS.insert_run(run_meta)
-        #     except Exception:
-        #         logger.error("Exception occurred while inserting run entry {}".format(run_meta))
-        #         traceback.print_exc()
+        tms_id = TS.get_timeseries_id_if_exists(tms_meta)
+
+        if tms_id is None:
+            tms_id = TS.generate_timeseries_id(tms_meta)
+
+            # run_meta = {
+            #     'tms_id': tms_id,
+            #     'sim_tag': tms_meta['sim_tag'],
+            #     'start_date': fgt,
+            #     'end_date': fgt,
+            #     'station_id': station_id,
+            #     'source_id': tms_meta['source_id'],
+            #     'unit_id': tms_meta['unit_id'],
+            #     'variable_id': tms_meta['variable_id']
+            # }
+            # try:
+            #     TS.insert_run(run_meta)
+            # except Exception:
+            #     time.sleep(5)
+            #     try:
+            #         TS.insert_run(run_meta)
+            #     except Exception:
+            #         logger.error("Exception occurred while inserting run entry {}".format(run_meta))
+            #         traceback.print_exc()
 
         timeseries = calculate_MME_series(TS=TS, start=start, end=end, variables=variables, station_id=station_id,
                                           variable_id=tms_meta['variable_id'], unit_id=tms_meta['unit_id'])
 
-        print(timeseries)
+        formatted_timeseries = []
+        for i in range(len(timeseries)):
+            formatted_timeseries.append([tms_id, timeseries[i][0].strftime('%Y-%m-%d %H:%M:00'),
+                                         fgt, float('%.3f' % timeseries[i][1])])
 
-        break
-
-        # try:
-        #     TS.insert_formatted_data(timeseries, True)  # upsert True
-        #     TS.update_latest_fgt(id_=tms_id, fgt=fgt)
-        # except Exception:
-        #     time.sleep(5)
-        #     try:
-        #         TS.insert_formatted_data(timeseries, True)  # upsert True
-        #         TS.update_latest_fgt(id_=tms_id, fgt=fgt)
-        #     except Exception:
-        #         msg = "Inserting the timseseries for tms_id {} and fgt {} failed.".format(timeseries[0][0],
-        #                                                                          timeseries[0][2])
-        #         logger.error(msg)
-        #         traceback.print_exc()
+        print(formatted_timeseries)
 
 
 if __name__=="__main__":
