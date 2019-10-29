@@ -86,15 +86,12 @@ def calculate_MME_series(TS, start, end, variables, station_id, variable_id, uni
 
         timeseries = list_of_lists_to_df_first_column_as_index(fcst_ts)
         timeseries[[0]] = timeseries[[0]].astype('float64') * coefficient
-
         print(timeseries)
         df = df.join(timeseries, lsuffix='_left', rsuffix='_right')
-        df.fillna(0)
 
-        print(df)
-
+    df.fillna(0)
     df['sum'] = df.sum(axis=1)
-    print('final dataframe', df)
+    return [df.sum.tolist()] + df.reset_index().values.tolist()
 
 
 def update_MME_tagged_series(pool, start, end, variables, sub_region, tms_meta, fgt):
@@ -111,7 +108,7 @@ def update_MME_tagged_series(pool, start, end, variables, sub_region, tms_meta, 
         station_id = wrf_v3_stations.get(station_prefix)
 
         TS = Timeseries(pool=pool)
-        #
+
         # tms_id = TS.get_timeseries_id_if_exists(tms_meta)
         #
         # if tms_id is None:
@@ -135,6 +132,8 @@ def update_MME_tagged_series(pool, start, end, variables, sub_region, tms_meta, 
 
         timeseries = calculate_MME_series(TS=TS, start=start, end=end, variables=variables, station_id=station_id,
                                           variable_id=tms_meta['variable_id'], unit_id=tms_meta['unit_id'])
+
+        print(timeseries)
 
         break
 
