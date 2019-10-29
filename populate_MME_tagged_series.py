@@ -89,7 +89,9 @@ def calculate_MME_series(TS, start, end, variables, station_id, variable_id, uni
 
     df.fillna(0)
     df['sum'] = df.sum(axis=1)
-    return [df.columns.tolist()] + df.reset_index().values.tolist()
+    timeseries_df = df['sum']
+
+    return timeseries_df.reset_index().values.tolist()
 
 
 def update_MME_tagged_series(pool, start, end, variables, sub_region, tms_meta, fgt):
