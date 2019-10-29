@@ -111,9 +111,13 @@ def calculate_MME_series(TS, start, end, variables, station_id, variable_id, uni
         try:
             source_id = get_source_id(pool=pool, model=model, version=version)
         except Exception:
-            msg = "Exception occurred while loading source id from database."
-            logger.error(msg)
-            exit(1)
+            try:
+                time.sleep(3)
+                source_id = get_source_id(pool=pool, model=source_name, version=tms_meta['version'])
+            except Exception:
+                msg = "Exception occurred while loading source id from database."
+                logger.error(msg)
+                exit(1)
 
         fcst_ts = TS.get_latest_timeseries(sim_tag=sim_tag, source_id=source_id, station_id=station_id,
                                  variable_id=variable_id, unit_id=unit_id)
@@ -132,7 +136,7 @@ def calculate_MME_series(TS, start, end, variables, station_id, variable_id, uni
 def update_MME_tagged_series(pool, start, end, variables, sub_region, tms_meta, fgt):
 
     for index, row in sub_region.iterrows():
-        lat = float('%.6f' % row['latitude'])
+        lat = float('%.6f' % row['latituadd functions to push timeseries to database and format timeseriesde'])
         lon = float('%.6f' % row['longitude'])
 
         tms_meta['latitude'] = str(lat)
