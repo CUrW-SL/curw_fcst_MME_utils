@@ -79,7 +79,7 @@ if __name__=="__main__":
         pool = get_Pool(host=CURW_FCST_HOST, port=CURW_FCST_PORT, user=CURW_FCST_USERNAME, password=CURW_FCST_PASSWORD,
                         db=CURW_FCST_DATABASE)
 
-        hash_ids = get_curw_fcst_hash_ids(pool=pool, sim_tag="gfs_d0_18", source_id="15",
+        hash_ids = get_curw_fcst_hash_ids(pool=pool, sim_tag="MME", source_id="18",
                                           variable_id=None, unit_id=None, station_id=None,
                                           start=None, end=None)
 
@@ -88,25 +88,25 @@ if __name__=="__main__":
         ################################################################################
         # delete as a whole (entry in run table and all related entries in data table) #
         ################################################################################
-        # count = 0
-        # for id in hash_ids:
-        #     TS.delete_all_by_hash_id(id_=id)
-        #     count+=1
-        #     print(count, id)
-        # print("{} of hash ids are deleted".format(len(hash_ids)))
+        count = 0
+        for id in hash_ids:
+            TS.delete_all_by_hash_id(id_=id)
+            count+=1
+            print(count, id)
+        print("{} of hash ids are deleted".format(len(hash_ids)))
 
 
         ###################################################################################
         # delete a specific timeseries defined by a given hash id and fgt from data table #
         ###################################################################################
-        fgt = "2019-10-17 18:16:37"
-        count = 0
-        for id in hash_ids:
-            TS.delete_timeseries(id_=id, fgt=fgt)
-            count += 1
-            print(count, id)
-
-        print("{} of hash ids are deleted".format(len(hash_ids)))
+        # fgt = "2019-10-17 18:16:37"
+        # count = 0
+        # for id in hash_ids:
+        #     TS.delete_timeseries(id_=id, fgt=fgt)
+        #     count += 1
+        #     print(count, id)
+        #
+        # print("{} of hash ids are deleted".format(len(hash_ids)))
 
     except Exception as e:
         print('An exception occurred.')
