@@ -113,7 +113,7 @@ def calculate_MME_series(TS, start, end, variables, station_id, variable_id, uni
         except Exception:
             try:
                 time.sleep(3)
-                source_id = get_source_id(pool=pool, model=source_name, version=tms_meta['version'])
+                source_id = get_source_id(pool=pool, model=model, version=version)
             except Exception:
                 msg = "Exception occurred while loading source id from database."
                 logger.error(msg)
@@ -227,6 +227,18 @@ if __name__=="__main__":
             msg = "Exception occurred while loading common metadata from database."
             logger.error(msg)
             sys.exit(1)
+
+        if variable_id is None:
+            msg = "Variable doesn't exist in the database. Please add the variable prior to run this script"
+            exit(1)
+
+        if unit_id is None:
+            msg = "Unit doesn't exist in the database. Please add the unit prior to run this script"
+            exit(1)
+
+        if source_id is None:
+            msg = "Source doesn't exist in the database. Please add the source prior to run this script"
+            exit(1)
 
         tms_meta = {
             'model': model,
