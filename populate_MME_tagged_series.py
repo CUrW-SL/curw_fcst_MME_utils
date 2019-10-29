@@ -80,13 +80,11 @@ def calculate_MME_series(TS, start, end, variables, station_id, variable_id, uni
             logger.error(msg)
             exit(1)
 
-        print("#########################", model, version)
         fcst_ts = TS.get_latest_timeseries(sim_tag=sim_tag, source_id=source_id, station_id=station_id,
                                  variable_id=variable_id, unit_id=unit_id)
 
         timeseries = list_of_lists_to_df_first_column_as_index(fcst_ts)
         timeseries[[0]] = timeseries[[0]].astype('float64') * coefficient
-        print(timeseries)
         df = df.join(timeseries, lsuffix='_left', rsuffix='_right')
 
     df.fillna(0)
