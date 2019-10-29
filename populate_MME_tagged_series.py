@@ -136,7 +136,7 @@ def calculate_MME_series(TS, start, end, variables, station_id, variable_id, uni
 def update_MME_tagged_series(pool, start, end, variables, sub_region, tms_meta, fgt):
 
     for index, row in sub_region.iterrows():
-        lat = float('%.6f' % row['latituadd functions to push timeseries to database and format timeseriesde'])
+        lat = float('%.6f' % row['latitude'])
         lon = float('%.6f' % row['longitude'])
 
         tms_meta['latitude'] = str(lat)
