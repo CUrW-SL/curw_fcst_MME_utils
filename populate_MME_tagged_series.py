@@ -149,25 +149,25 @@ def update_MME_tagged_series(pool, start, end, variables, sub_region, tms_meta, 
         if tms_id is None:
             tms_id = TS.generate_timeseries_id(tms_meta)
 
-            # run_meta = {
-            #     'tms_id': tms_id,
-            #     'sim_tag': tms_meta['sim_tag'],
-            #     'start_date': fgt,
-            #     'end_date': fgt,
-            #     'station_id': station_id,
-            #     'source_id': tms_meta['source_id'],
-            #     'unit_id': tms_meta['unit_id'],
-            #     'variable_id': tms_meta['variable_id']
-            # }
-            # try:
-            #     TS.insert_run(run_meta)
-            # except Exception:
-            #     time.sleep(5)
-            #     try:
-            #         TS.insert_run(run_meta)
-            #     except Exception:
-            #         logger.error("Exception occurred while inserting run entry {}".format(run_meta))
-            #         traceback.print_exc()
+            run_meta = {
+                'tms_id': tms_id,
+                'sim_tag': tms_meta['sim_tag'],
+                'start_date': fgt,
+                'end_date': fgt,
+                'station_id': station_id,
+                'source_id': tms_meta['source_id'],
+                'unit_id': tms_meta['unit_id'],
+                'variable_id': tms_meta['variable_id']
+            }
+            try:
+                TS.insert_run(run_meta)
+            except Exception:
+                time.sleep(5)
+                try:
+                    TS.insert_run(run_meta)
+                except Exception:
+                    logger.error("Exception occurred while inserting run entry {}".format(run_meta))
+                    traceback.print_exc()
 
         timeseries = calculate_MME_series(TS=TS, start=start, end=end, variables=variables, station_id=station_id,
                                           variable_id=tms_meta['variable_id'], unit_id=tms_meta['unit_id'])
@@ -177,9 +177,7 @@ def update_MME_tagged_series(pool, start, end, variables, sub_region, tms_meta, 
             formatted_timeseries.append([tms_id, timeseries[i][0].strftime('%Y-%m-%d %H:%M:00'),
                                          fgt, float('%.3f' % timeseries[i][1])])
 
-        print(formatted_timeseries)
-
-        break
+        push_rainfall_to_db(ts=TS, ts_data=formatted_timeseries, tms_id=tms_id, fgt=fgt)
 
 
 if __name__=="__main__":
