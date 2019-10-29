@@ -179,6 +179,8 @@ def update_MME_tagged_series(pool, start, end, variables, sub_region, tms_meta, 
 
         print(formatted_timeseries)
 
+        break
+
 
 if __name__=="__main__":
 
