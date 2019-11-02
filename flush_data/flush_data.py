@@ -99,7 +99,7 @@ if __name__=="__main__":
         ###################################################################################
         # delete a specific timeseries defined by a given hash id and fgt from data table #
         ###################################################################################
-        fgt = "2019-10-17 18:17:52"
+        fgt = "2019-10-17 20:43:38"
         count = 0
         for id in hash_ids:
             TS.delete_timeseries(id_=id, fgt=fgt)
