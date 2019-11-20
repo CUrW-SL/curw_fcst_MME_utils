@@ -79,7 +79,7 @@ if __name__=="__main__":
         pool = get_Pool(host=CURW_FCST_HOST, port=CURW_FCST_PORT, user=CURW_FCST_USERNAME, password=CURW_FCST_PASSWORD,
                         db=CURW_FCST_DATABASE)
 
-        hash_ids = get_curw_fcst_hash_ids(pool=pool, sim_tag="gfs_d0_18", source_id=21,
+        hash_ids = get_curw_fcst_hash_ids(pool=pool, sim_tag="daily_run", source_id=None,
                                           variable_id=None, unit_id=None, station_id=None,
                                           start=None, end=None)
 
