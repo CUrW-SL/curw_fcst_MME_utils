@@ -88,13 +88,12 @@ if __name__=="__main__":
         ################################################################################
         # delete as a whole (entry in run table and all related entries in data table) #
         ################################################################################
-        count = 0
-        for id in hash_ids:
-            TS.delete_all_by_hash_id(id_=id)
-            count+=1
-            print(count, id)
-        print("{} of hash ids are deleted".format(len(hash_ids)))
-
+        # count = 0
+        # for id in hash_ids:
+        #     TS.delete_all_by_hash_id(id_=id)
+        #     count+=1
+        #     print(count, id)
+        # print("{} of hash ids are deleted".format(len(hash_ids)))
 
         ###################################################################################
         # delete a specific timeseries defined by a given hash id and fgt from data table #
