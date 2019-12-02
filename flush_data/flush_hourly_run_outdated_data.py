@@ -45,8 +45,11 @@ if __name__=="__main__":
             outdated_fgts = select_fgts_older_than_month(fgts)
             count += 1
             for fgt in outdated_fgts:
+                fgts.remove(fgt)
                 TS.delete_timeseries(id_=id, fgt=fgt)
                 print(count, id, fgt)
+
+            TS.update_start_date(id_=id, start_date=min(fgts), force=True)
 
         print("{} of hash ids are deleted.".format(count))
 
