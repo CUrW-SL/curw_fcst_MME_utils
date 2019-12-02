@@ -1,3 +1,4 @@
+#!/home/uwcc-admin/curw_fcst_MME_utils/venv/bin/python3
 import traceback
 from datetime import datetime, timedelta
 
