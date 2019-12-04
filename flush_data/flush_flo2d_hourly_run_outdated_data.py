@@ -8,8 +8,8 @@ from db_adapter.base import get_Pool, destroy_Pool
 from db_adapter.curw_fcst.common import get_distinct_fgts_for_given_id, get_curw_fcst_hash_ids
 from db_adapter.curw_fcst.timeseries import Timeseries
 
-from db_adapter.constants import CURW_FCST_USERNAME, CURW_FCST_PORT, CURW_FCST_PASSWORD, CURW_FCST_HOST, \
-    CURW_FCST_DATABASE
+# from db_adapter.constants import CURW_FCST_USERNAME, CURW_FCST_PORT, CURW_FCST_PASSWORD, CURW_FCST_HOST, \
+#     CURW_FCST_DATABASE
 
 FLO2D_250_ID = 9
 FLO2D_150_ID = 10
@@ -55,13 +55,13 @@ if __name__=="__main__":
 
     try:
 
-        # set_db_config_file_path('/home/uwcc-admin/curw_fcst_MME_utils/db_adapter_config.json')
-        #
-        # pool = get_Pool(host=connection.CURW_FCST_HOST, port=connection.CURW_FCST_PORT, user=connection.CURW_FCST_USERNAME,
-        #                 password=connection.CURW_FCST_PASSWORD, db=connection.CURW_FCST_DATABASE)
+        set_db_config_file_path('/home/uwcc-admin/curw_fcst_MME_utils/db_adapter_config.json')
 
-        pool = get_Pool(host=CURW_FCST_HOST, port=CURW_FCST_PORT,
-                        user=CURW_FCST_USERNAME, password=CURW_FCST_PASSWORD, db=CURW_FCST_DATABASE)
+        pool = get_Pool(host=connection.CURW_FCST_HOST, port=connection.CURW_FCST_PORT, user=connection.CURW_FCST_USERNAME,
+                        password=connection.CURW_FCST_PASSWORD, db=connection.CURW_FCST_DATABASE)
+
+        # pool = get_Pool(host=CURW_FCST_HOST, port=CURW_FCST_PORT,
+        #                 user=CURW_FCST_USERNAME, password=CURW_FCST_PASSWORD, db=CURW_FCST_DATABASE)
 
         flo2d_250_hash_ids = get_curw_fcst_hash_ids(pool=pool, sim_tag="hourly_run", source_id=FLO2D_250_ID,
                                           variable_id=None, unit_id=None, station_id=None,
