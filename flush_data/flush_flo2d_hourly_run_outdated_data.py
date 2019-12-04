@@ -54,13 +54,8 @@ if __name__=="__main__":
 
         set_db_config_file_path('/home/uwcc-admin/curw_fcst_MME_utils/db_adapter_config.json')
 
-        print(connection.CURW_FCST_DATABASE)
-        print(connection.CURW_FCST_PORT)
-        print(connection.CURW_FCST_HOST)
-        print(connection.CURW_FCST_USERNAME)
-        print(connection.CURW_FCST_PASSWORD)
-        pool = get_Pool(host=CURW_FCST_HOST, port=CURW_FCST_PORT, user=CURW_FCST_USERNAME, password=CURW_FCST_PASSWORD,
-                        db=CURW_FCST_DATABASE)
+        pool = get_Pool(host=connection.CURW_FCST_HOST, port=connection.CURW_FCST_PORT, user=connection.CURW_FCST_USERNAME,
+                        password=connection.CURW_FCST_PASSWORD, db=connection.CURW_FCST_DATABASE)
 
         flo2d_250_hash_ids = get_curw_fcst_hash_ids(pool=pool, sim_tag="hourly_run", source_id=FLO2D_250_ID,
                                           variable_id=None, unit_id=None, station_id=None,
