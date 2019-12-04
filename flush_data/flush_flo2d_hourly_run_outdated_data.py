@@ -3,11 +3,7 @@ import traceback
 from datetime import datetime, timedelta
 
 from db_adapter.constants import set_db_config_file_path
-
-set_db_config_file_path('/home/uwcc-admin/curw_fcst_MME_utils/db_adapter_config.json')
-
-from db_adapter.constants import CURW_FCST_DATABASE, CURW_FCST_PORT, CURW_FCST_PASSWORD, CURW_FCST_USERNAME, \
-    CURW_FCST_HOST
+from db_adapter.constants import connection
 from db_adapter.base import get_Pool, destroy_Pool
 from db_adapter.curw_fcst.common import get_distinct_fgts_for_given_id, get_curw_fcst_hash_ids
 from db_adapter.curw_fcst.timeseries import Timeseries
@@ -56,11 +52,13 @@ if __name__=="__main__":
 
     try:
 
-        print(CURW_FCST_DATABASE)
-        print(CURW_FCST_PORT)
-        print(CURW_FCST_HOST)
-        print(CURW_FCST_USERNAME)
-        print(CURW_FCST_PASSWORD)
+        set_db_config_file_path('/home/uwcc-admin/curw_fcst_MME_utils/db_adapter_config.json')
+
+        print(connection.CURW_FCST_DATABASE)
+        print(connection.CURW_FCST_PORT)
+        print(connection.CURW_FCST_HOST)
+        print(connection.CURW_FCST_USERNAME)
+        print(connection.CURW_FCST_PASSWORD)
         pool = get_Pool(host=CURW_FCST_HOST, port=CURW_FCST_PORT, user=CURW_FCST_USERNAME, password=CURW_FCST_PASSWORD,
                         db=CURW_FCST_DATABASE)
 
