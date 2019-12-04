@@ -56,6 +56,11 @@ if __name__=="__main__":
 
     try:
 
+        print(CURW_FCST_DATABASE)
+        print(CURW_FCST_PORT)
+        print(CURW_FCST_HOST)
+        print(CURW_FCST_USERNAME)
+        print(CURW_FCST_PASSWORD)
         pool = get_Pool(host=CURW_FCST_HOST, port=CURW_FCST_PORT, user=CURW_FCST_USERNAME, password=CURW_FCST_PASSWORD,
                         db=CURW_FCST_DATABASE)
 
