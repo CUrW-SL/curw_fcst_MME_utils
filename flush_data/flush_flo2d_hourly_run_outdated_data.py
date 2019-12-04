@@ -2,6 +2,7 @@
 import traceback
 from datetime import datetime, timedelta
 
+from db_adapter.constants import set_db_config_file_path
 from db_adapter.constants import CURW_FCST_DATABASE, CURW_FCST_PORT, CURW_FCST_PASSWORD, CURW_FCST_USERNAME, \
     CURW_FCST_HOST
 from db_adapter.base import get_Pool, destroy_Pool
@@ -49,6 +50,8 @@ def flush_timeseries(pool, hash_ids):
 
 
 if __name__=="__main__":
+
+    set_db_config_file_path('/home/uwcc-admin/curw_fcst_MME_utils/db_adapter_config.json')
 
     try:
 
