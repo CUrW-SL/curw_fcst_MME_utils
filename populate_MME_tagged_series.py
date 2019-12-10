@@ -158,7 +158,6 @@ def calculate_MME_series(TS, start, end, variables, coefficients, station_id, va
         df = df.join(timeseries, lsuffix='_left', rsuffix='_right')
 
     df.fillna(0)
-    print("coefficient type, ", type(coefficients[index+1]))
     df['sum'] = df.sum(axis=1) + float(coefficients[index+1])  # + coefficients[index+1] ==> adding the constant
     timeseries_df = df['sum']
 
