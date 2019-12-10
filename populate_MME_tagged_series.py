@@ -2,6 +2,8 @@
 import traceback
 import json
 import pandas as pd
+import geopandas as gpd
+from shapely.geometry import Point, Polygon
 from datetime import datetime, timedelta
 import sys
 import numpy as np
@@ -20,6 +22,14 @@ from db_adapter.curw_fcst.source import get_source_id
 from db_adapter.curw_fcst.timeseries import Timeseries
 
 wrf_v3_stations = {}
+
+
+def read_csv(file_name):
+
+    with open(file_name, 'r') as f:
+        data = [list(line) for line in csv.reader(f)][1:]
+
+    return data
 
 
 def list_of_lists_to_df_first_column_as_index(data):
@@ -89,24 +99,45 @@ def push_rainfall_to_db(ts, ts_data, tms_id, fgt):
             traceback.print_exc()
 
 
-def select_d03_sub_region(all_grids, lon_min, lon_max, lat_min, lat_max):
+def select_d03__rectagular_sub_region(all_grids, lon_min, lon_max, lat_min, lat_max):
     selected_grids = all_grids[(all_grids.longitude >= lon_min) & (all_grids.longitude <= lon_max) &
                                    (all_grids.latitude >= lat_min) & (all_grids.latitude <= lat_max)]
 
     return selected_grids
 
 
-def calculate_MME_series(TS, start, end, variables, station_id, variable_id, unit_id):
+def select_d03_grids_within_region(d03_grids, region):
+    """
+    param: d03_grids: pandas dataframe with 'latitude' and 'longitude' as columns
+    param: region: data of a shape file containing single region (single polygon in 'geometry' field)
+
+    returns: grids inside the polygon as a pandas dataframe with 'latitude' and 'longitude' as columns
+    """
+
+    polygon = region.iloc[0]['geometry']
+
+    for index, row in d03_grids.iterrows():
+        p = Point(row['longitude'], row['latitude'])
+        if p.within(polygon):
+            d03_grids.loc[index, 'is_in'] = True
+        else:
+            d03_grids.loc[index, 'is_in'] = False
+
+    selected_region = d03_grids[d03_grids.is_in == True]
+    return selected_region
+
+
+def calculate_MME_series(TS, start, end, variables, coefficients, station_id, variable_id, unit_id):
 
     index = pd.date_range(start=start, end=end, freq='15min')
     df = pd.DataFrame(index=index)
 
-    for variable in variables:
+    for index, variable in enumerate(variables):
 
         model = variable[0]
         version = variable[1]
         sim_tag = variable[2]
-        coefficient = variable[3]
+        coefficient = coefficients[index]
 
         try:
             source_id = get_source_id(pool=pool, model=model, version=version)
@@ -127,13 +158,13 @@ def calculate_MME_series(TS, start, end, variables, station_id, variable_id, uni
         df = df.join(timeseries, lsuffix='_left', rsuffix='_right')
 
     df.fillna(0)
-    df['sum'] = df.sum(axis=1)
+    df['sum'] = df.sum(axis=1) + coefficients[index+1]  # + coefficients[index+1] ==> adding the constant
     timeseries_df = df['sum']
 
     return timeseries_df.reset_index().values.tolist()
 
 
-def update_MME_tagged_series(pool, start, end, variables, sub_region, tms_meta, fgt):
+def update_MME_tagged_series(pool, start, end, variables, coefficients, sub_region, tms_meta, fgt):
 
     for index, row in sub_region.iterrows():
         lat = float('%.6f' % row['latitude'])
@@ -173,7 +204,8 @@ def update_MME_tagged_series(pool, start, end, variables, sub_region, tms_meta, 
                     logger.error("Exception occurred while inserting run entry {}".format(run_meta))
                     traceback.print_exc()
 
-        timeseries = calculate_MME_series(TS=TS, start=start, end=end, variables=variables, station_id=station_id,
+        timeseries = calculate_MME_series(TS=TS, start=start, end=end, variables=variables, coefficients=coefficients,
+                                          station_id=station_id,
                                           variable_id=tms_meta['variable_id'], unit_id=tms_meta['unit_id'])
 
         formatted_timeseries = []
@@ -190,13 +222,24 @@ if __name__=="__main__":
         # load d03 grids
         d03_grids = pd.read_csv('d03_grids_sorted.csv', delimiter=",")
 
-        # load connection parameters
-        mme_config = json.loads(open('MME_config.json').read())
+        ##############################
+        # load variables; model list #
+        ##############################
+        model_list_config = json.loads(open('configs/model_list_config.json').read())
 
-        wrf_regions = read_attribute_from_config_file('wrf_regions', mme_config, True)
+        # [model,version,sim_tag]
+        variables = read_attribute_from_config_file('model_list', model_list_config, True)
 
-        # load meta data
-        meta_config = json.loads(open('config.json').read())
+        #####################
+        # load coefficients #
+        #####################
+        # ['region_id','c1','c2','c3','c4','constant']
+        coefficients = read_csv('configs/coefficients.csv')
+
+        ##################
+        # load meta data #
+        ##################
+        meta_config = json.loads(open('configs/config.json').read())
 
         # source details
         model = read_attribute_from_config_file('model', meta_config, True)
@@ -252,25 +295,23 @@ if __name__=="__main__":
             'source_id': source_id
         }
 
-        for region in wrf_regions:
-            lon_min = region.get('lon_min')
-            lon_max = region.get('lon_max')
-            lat_min = region.get('lat_min')
-            lat_max = region.get('lat_max')
-            start = region.get('start')
-            end = region.get('end')
-            variables = region.get('variables')
+        for i in range(len(coefficients)):
 
-            sub_region = select_d03_sub_region(all_grids=d03_grids, lon_min=lon_min, lon_max=lon_max,
-                                               lat_min=lat_min, lat_max=lat_max)
+            region = gpd.read_file('regions/P{}.shp'.format(coefficients[i][0]))
+
+            start = (datetime.now() + timedelta(hours=5, minutes=30)).strftime("%Y-%m-%d %H:00:00")
+            end = (datetime.now() + timedelta(days=2)).strftime("%Y-%m-%d 00:00:00")
+
+            sub_region = select_d03_grids_within_region(d03_grids=d03_grids, region=region)
 
             update_MME_tagged_series(pool=pool, start=start, end=end, variables=variables, sub_region=sub_region,
-                                     tms_meta=tms_meta, fgt=fgt)
+                                     coefficients=coefficients[i][1:], tms_meta=tms_meta, fgt=fgt)
 
     except Exception as e:
         print('An exception occurred.')
         traceback.print_exc()
     finally:
+
         print("Process finished")
         destroy_Pool(pool=pool)
 
