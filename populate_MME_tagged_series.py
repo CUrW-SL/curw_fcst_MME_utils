@@ -138,7 +138,6 @@ def calculate_MME_series(TS, start, end, variables, coefficients, station_id, va
         version = variable[1]
         sim_tag = variable[2]
         coefficient = float(coefficients[index])
-        print("coefficient: ", coefficient)
 
         try:
             source_id = get_source_id(pool=pool, model=model, version=version)
@@ -159,7 +158,8 @@ def calculate_MME_series(TS, start, end, variables, coefficients, station_id, va
         df = df.join(timeseries, lsuffix='_left', rsuffix='_right')
 
     df.fillna(0)
-    df['sum'] = df.sum(axis=1) + coefficients[index+1]  # + coefficients[index+1] ==> adding the constant
+    print("coefficient type, ", type(coefficients[index+1]))
+    df['sum'] = df.sum(axis=1) + float(coefficients[index+1])  # + coefficients[index+1] ==> adding the constant
     timeseries_df = df['sum']
 
     return timeseries_df.reset_index().values.tolist()
