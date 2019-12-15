@@ -131,6 +131,7 @@ def calculate_MME_series(TS, start, end, variables, coefficients, station_id, va
 
     index = pd.date_range(start=start, end=end, freq='15min')
     df = pd.DataFrame(index=index)
+    boundary = pd.DataFrame(index=index)
 
     for index, variable in enumerate(variables):
 
@@ -154,11 +155,34 @@ def calculate_MME_series(TS, start, end, variables, coefficients, station_id, va
                                  variable_id=variable_id, unit_id=unit_id)
 
         timeseries = list_of_lists_to_df_first_column_as_index(fcst_ts)
+
+        # start -- boundary dataframe creation #
+        boundary_temp = timeseries.copy()
+        boundary_temp[[0]] = boundary_temp[[0]].astype('float64')
+        boundary.join(boundary_temp, lsuffix='_left', rsuffix='_right')
+        # end -- boundary dataframe creation #
+
         timeseries[[0]] = timeseries[[0]].astype('float64') * coefficient
         df = df.join(timeseries, lsuffix='_left', rsuffix='_right')
 
     df.fillna(0)
     df['sum'] = df.sum(axis=1) + float(coefficients[index+1])  # + coefficients[index+1] ==> adding the constant
+
+    # start - boundary condition check #
+    boundary['min'] = boundary.min(axis=1)
+    boundary['max'] = boundary.max(axis=1)
+    for index, row in boundary.iterrows():
+        value = df.loc[index, 'sum']
+        min = boundary.loc[index, 'min']
+        max = boundary.loc[index, 'max']
+        if value > max:
+            df.loc[index, 'sum'] = max
+        elif value < min:
+            df.loc[index, 'sum'] = max
+
+        print(value, max, min, df.loc[index, 'sum'])
+    # end - boundary condition check #
+
     timeseries_df = df['sum']
 
     return timeseries_df.reset_index().values.tolist()
